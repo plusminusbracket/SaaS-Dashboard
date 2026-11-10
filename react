@@ -1,0 +1,1268 @@
+```react
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  LayoutDashboard,
+  FolderLock,
+  MessageSquare,
+  CheckSquare,
+  FileText,
+  CreditCard,
+  User,
+  ShieldAlert,
+  Bell,
+  Search,
+  Plus,
+  Upload,
+  Download,
+  Eye,
+  Trash2,
+  Send,
+  Paperclip,
+  CheckCheck,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  TrendingUp,
+  DollarSign,
+  ChevronRight,
+  Filter,
+  Sparkles,
+  ExternalLink,
+  ShieldCheck,
+  Lock,
+  FileCode,
+  Image as ImageIcon,
+  FileSpreadsheet,
+  X,
+  ArrowUpRight,
+  RefreshCw,
+  LogOut,
+  Sun,
+  Moon,
+  Users,
+  Settings,
+  SlidersHorizontal,
+  ChevronDown,
+  Info
+} from 'lucide-react';
+
+// --- INITIAL MOCK DATA ---
+const INITIAL_PROJECTS = [
+  {
+    id: 'proj-101',
+    name: 'Enterprise Cloud Migration',
+    client: 'Acme Health Corp',
+    progress: 75,
+    status: 'In Progress',
+    deadline: '2026-12-15',
+    budget: 45000,
+    manager: 'Sarah Jenkins',
+    milestones: [
+      { id: 'm1', title: 'Architecture Planning & Audit', status: 'Completed', date: '2026-09-10' },
+      { id: 'm2', title: 'Staging Infrastructure Setup', status: 'Completed', date: '2026-10-25' },
+      { id: 'm3', title: 'Data Pipeline Migration', status: 'In Progress', date: '2026-11-20' },
+      { id: 'm4', title: 'Security & Compliance Sign-off', status: 'Pending', date: '2026-12-10' }
+    ],
+    deliverables: [
+      { id: 'd1', title: 'System Security Specs PDF', status: 'Approved', link: '#' },
+      { id: 'd2', title: 'Terraform Infrastructure Scripts', status: 'Pending Review', link: '#' },
+      { id: 'd3', title: 'DB Benchmark Report', status: 'In Draft', link: '#' }
+    ]
+  },
+  {
+    id: 'proj-102',
+    name: 'Brand Redesign & Design System',
+    client: 'Acme Health Corp',
+    progress: 40,
+    status: 'In Progress',
+    deadline: '2027-01-30',
+    budget: 28000,
+    manager: 'Alex Rivera',
+    milestones: [
+      { id: 'm201', title: 'Brand Discovery & Moodboards', status: 'Completed', date: '2026-10-05' },
+      { id: 'm202', title: 'Logo System & Typography', status: 'In Progress', date: '2026-11-15' },
+      { id: 'm203', title: 'UI Component Library Design', status: 'Pending', date: '2026-12-20' }
+    ],
+    deliverables: [
+      { id: 'd201', title: 'Brand Identity Guidelines v1.2', status: 'Approved', link: '#' },
+      { id: 'd202', title: 'Figma UI Component Kit', status: 'Pending Review', link: '#' }
+    ]
+  }
+];
+
+const INITIAL_FILES = [
+  {
+    id: 'f-1',
+    name: 'SOW_CloudMigration_v2.pdf',
+    size: '4.2 MB',
+    type: 'pdf',
+    folder: 'Contracts & SOWs',
+    uploadedBy: 'Sarah Jenkins (PM)',
+    date: '2026-09-02',
+    access: 'Shared with Client',
+    downloads: 14
+  },
+  {
+    id: 'f-2',
+    name: 'Q3_Security_Audit_Report.pdf',
+    size: '8.7 MB',
+    type: 'pdf',
+    folder: 'Security & Compliance',
+    uploadedBy: 'Marcus Vance (SecOps)',
+    date: '2026-10-14',
+    access: 'Restricted (Client Admin)',
+    downloads: 5
+  },
+  {
+    id: 'f-3',
+    name: 'Brand_Assets_Master_Bundle.zip',
+    size: '142 MB',
+    type: 'zip',
+    folder: 'Design Assets',
+    uploadedBy: 'Alex Rivera (Design)',
+    date: '2026-10-28',
+    access: 'Shared with Client',
+    downloads: 29
+  },
+  {
+    id: 'f-4',
+    name: 'Infrastructure_Cost_Forecast.xlsx',
+    size: '1.1 MB',
+    type: 'sheet',
+    folder: 'Financials',
+    uploadedBy: 'Sarah Jenkins (PM)',
+    date: '2026-11-02',
+    access: 'Shared with Client',
+    downloads: 8
+  }
+];
+
+const INITIAL_INVOICES = [
+  {
+    id: 'INV-2026-009',
+    title: 'Cloud Infrastructure - Sprint 3 Milestone',
+    amount: 12500.00,
+    dueDate: '2026-11-25',
+    issueDate: '2026-11-01',
+    status: 'Pending', // Paid, Pending, Overdue
+    project: 'Enterprise Cloud Migration',
+    items: [
+      { description: 'Database cluster migration scripts & testing', cost: 7500.00 },
+      { description: 'DevOps Staging setup (AWS ECS/Terraform)', cost: 5000.00 }
+    ]
+  },
+  {
+    id: 'INV-2026-004',
+    title: 'Design System Phase 1 Deposit',
+    amount: 8400.00,
+    dueDate: '2026-10-15',
+    issueDate: '2026-09-30',
+    status: 'Paid',
+    paidDate: '2026-10-12',
+    project: 'Brand Redesign & Design System',
+    items: [
+      { description: 'Phase 1 Discovery & Figma System Setup', cost: 8400.00 }
+    ]
+  },
+  {
+    id: 'INV-2026-001',
+    title: 'Initial Architecture Audit & Kickoff',
+    amount: 15000.00,
+    dueDate: '2026-09-15',
+    issueDate: '2026-09-01',
+    status: 'Paid',
+    paidDate: '2026-09-10',
+    project: 'Enterprise Cloud Migration',
+    items: [
+      { description: 'Enterprise Architecture Assessment & Roadmapping', cost: 15000.00 }
+    ]
+  }
+];
+
+const INITIAL_MESSAGES = [
+  {
+    id: 'm-1',
+    sender: 'Sarah Jenkins',
+    role: 'Project Manager',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    time: '10:15 AM',
+    text: 'Good morning team! We have finalized the staging cluster for the migration. Please review the updated SOW document when you get a chance.',
+    attachments: ['SOW_CloudMigration_v2.pdf'],
+    channel: 'General Updates'
+  },
+  {
+    id: 'm-2',
+    sender: 'David Miller',
+    role: 'Client (Acme VP)',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+    time: '10:42 AM',
+    text: 'Thanks Sarah. Checking out the staging server now. Quick question: is the failover mechanism tested yet?',
+    attachments: [],
+    channel: 'General Updates'
+  },
+  {
+    id: 'm-3',
+    sender: 'Sarah Jenkins',
+    role: 'Project Manager',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    time: '10:48 AM',
+    text: 'Yes! Automated failover passed testing yesterday. I have attached the benchmark report in the files vault under Security & Compliance.',
+    attachments: ['Q3_Security_Audit_Report.pdf'],
+    channel: 'General Updates'
+  }
+];
+
+const AUDIT_LOGS = [
+  { id: 'al-1', action: 'File Downloaded', details: 'SOW_CloudMigration_v2.pdf downloaded by David Miller', time: '10:45 AM, Today', user: 'David Miller' },
+  { id: 'al-2', action: 'Invoice Paid', details: 'INV-2026-004 marked as PAID ($8,400.00)', time: 'Oct 12, 2026', user: 'Client Admin' },
+  { id: 'al-3', action: 'Deliverable Approved', details: 'System Security Specs PDF approved by David Miller', time: 'Oct 08, 2026', user: 'David Miller' },
+  { id: 'al-4', action: 'File Uploaded', details: 'Brand_Assets_Master_Bundle.zip uploaded by Alex Rivera', time: 'Oct 28, 2026', user: 'Alex Rivera' }
+];
+
+export default function App() {
+  // --- STATE ---
+  const [role, setRole] = useState('client'); // 'client' or 'admin'
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [projects, setProjects] = useState(INITIAL_PROJECTS);
+  const [files, setFiles] = useState(INITIAL_FILES);
+  const [invoices, setInvoices] = useState(INITIAL_INVOICES);
+  const [messages, setMessages] = useState(INITIAL_MESSAGES);
+  const [auditLogs, setAuditLogs] = useState(AUDIT_LOGS);
+  const [activeChannel, setActiveChannel] = useState('General Updates');
+
+  // UI Modals & Filter states
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFolderFilter, setSelectedFolderFilter] = useState('All');
+  const [fileSearchQuery, setFileSearchQuery] = useState('');
+  const [newMessageText, setNewMessageText] = useState('');
+  const [toastMessage, setToastMessage] = useState(null);
+
+  // Payment Form Simulation
+  const [paymentStep, setPaymentStep] = useState('card'); // 'card', 'processing', 'success'
+  const [cardDetails, setCardDetails] = useState({ name: '', number: '', exp: '', cvc: '' });
+
+  // Notification helper
+  const showNotification = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  // Log activity helper
+  const addAuditLog = (action, details) => {
+    const newLog = {
+      id: 'al-' + Date.now(),
+      action,
+      details,
+      time: 'Just now',
+      user: role === 'client' ? 'Client User' : 'Admin Manager'
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+  };
+
+  // Handlers
+  const handleFileUpload = (e) => {
+    e.preventDefault();
+    setIsUploading(true);
+    setTimeout(() => {
+      const newFile = {
+        id: 'f-' + Date.now(),
+        name: 'Project_Specification_v3.pdf',
+        size: '3.4 MB',
+        type: 'pdf',
+        folder: selectedFolderFilter === 'All' ? 'General Docs' : selectedFolderFilter,
+        uploadedBy: role === 'client' ? 'Client Upload' : 'Admin Manager',
+        date: new Date().toISOString().split('T')[0],
+        access: role === 'client' ? 'Shared with Agency' : 'Shared with Client',
+        downloads: 0
+      };
+      setFiles(prev => [newFile, ...prev]);
+      setIsUploading(false);
+      addAuditLog('File Uploaded', `${newFile.name} uploaded successfully.`);
+      showNotification('File successfully uploaded to encrypted vault!');
+    }, 1200);
+  };
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!newMessageText.trim()) return;
+
+    const newMsg = {
+      id: 'msg-' + Date.now(),
+      sender: role === 'client' ? 'David Miller' : 'Sarah Jenkins (PM)',
+      role: role === 'client' ? 'Client (Acme VP)' : 'Project Manager',
+      avatar: role === 'client' 
+        ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' 
+        : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      text: newMessageText,
+      attachments: [],
+      channel: activeChannel
+    };
+
+    setMessages(prev => [...prev, newMsg]);
+    setNewMessageText('');
+    addAuditLog('Message Sent', `Sent message in #${activeChannel}`);
+  };
+
+  const handleProcessPayment = (e) => {
+    e.preventDefault();
+    setPaymentStep('processing');
+    setTimeout(() => {
+      setPaymentStep('success');
+      // Update invoice status
+      setInvoices(prev => prev.map(inv => inv.id === selectedInvoice.id ? { ...inv, status: 'Paid', paidDate: new Date().toISOString().split('T')[0] } : inv));
+      addAuditLog('Invoice Paid', `${selectedInvoice.id} paid ($${selectedInvoice.amount.toLocaleString()})`);
+      showNotification(`Payment successful for Invoice ${selectedInvoice.id}`);
+    }, 2000);
+  };
+
+  const handleApproveDeliverable = (projId, delivId) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projId) {
+        return {
+          ...p,
+          deliverables: p.deliverables.map(d => d.id === delivId ? { ...d, status: 'Approved' } : d)
+        };
+      }
+      return p;
+    }));
+    addAuditLog('Deliverable Approved', `Deliverable approved in project ${projId}`);
+    showNotification('Deliverable status updated to Approved.');
+  };
+
+  const handleToggleMilestone = (projId, milestoneId) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projId) {
+        return {
+          ...p,
+          milestones: p.milestones.map(m => {
+            if (m.id === milestoneId) {
+              const nextStatus = m.status === 'Completed' ? 'In Progress' : 'Completed';
+              return { ...m, status: nextStatus };
+            }
+            return m;
+          })
+        };
+      }
+      return p;
+    }));
+    addAuditLog('Milestone Updated', `Milestone status changed in ${projId}`);
+  };
+
+  // Filtered files
+  const filteredFiles = useMemo(() => {
+    return files.filter(f => {
+      const matchesFolder = selectedFolderFilter === 'All' || f.folder === selectedFolderFilter;
+      const matchesSearch = f.name.toLowerCase().includes(fileSearchQuery.toLowerCase());
+      return matchesFolder && matchesSearch;
+    });
+  }, [files, selectedFolderFilter, fileSearchQuery]);
+
+  // Total Metrics
+  const pendingTotal = invoices.filter(i => i.status === 'Pending').reduce((acc, i) => acc + i.amount, 0);
+  const paidTotal = invoices.filter(i => i.status === 'Paid').reduce((acc, i) => acc + i.amount, 0);
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col md:flex-row">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-5 right-5 z-50 bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce border border-emerald-400/40">
+          <CheckCircle2 className="w-5 h-5" />
+          <span className="font-medium text-sm">{toastMessage}</span>
+        </div>
+      )}
+
+      {/* --- SIDEBAR NAVIGATION --- */}
+      <aside className="w-full md:w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0">
+        <div>
+          {/* Brand Header */}
+          <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-tr from-blue-600 to-indigo-500 p-2.5 rounded-xl shadow-lg shadow-blue-500/20">
+                <ShieldCheck className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="font-bold text-base tracking-wide text-white leading-tight">NexusPortal</h1>
+                <p className="text-xs text-slate-400">Enterprise Workspace</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="p-4 space-y-1.5">
+            {[
+              { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'projects', label: 'Project Status', icon: CheckSquare },
+              { id: 'files', label: 'Secure Files', icon: FolderLock, badge: files.length },
+              { id: 'messages', label: 'Messages', icon: MessageSquare, badge: messages.length },
+              { id: 'invoices', label: 'Invoices & Billing', icon: FileText, badge: invoices.filter(i => i.status === 'Pending').length }
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge !== undefined && item.badge > 0 && (
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-300'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Role Switcher & User Profile Widget */}
+        <div className="p-4 border-t border-slate-800 bg-slate-900/50 space-y-3">
+          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs uppercase tracking-wider font-semibold text-slate-400 flex items-center gap-1.5">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-blue-400" /> Active Role View
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
+              <button
+                onClick={() => { setRole('client'); showNotification('Switched view to Client Mode'); }}
+                className={`py-1.5 text-xs font-semibold rounded-md transition-all ${
+                  role === 'client' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Client View
+              </button>
+              <button
+                onClick={() => { setRole('admin'); showNotification('Switched view to Admin Manager Mode'); }}
+                className={`py-1.5 text-xs font-semibold rounded-md transition-all ${
+                  role === 'admin' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Admin Mode
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 px-2 py-1">
+            <img
+              src={role === 'client' ? "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" : "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"}
+              alt="Avatar"
+              className="w-9 h-9 rounded-full border border-blue-500/30 object-cover"
+            />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-white truncate">
+                {role === 'client' ? 'David Miller' : 'Sarah Jenkins'}
+              </p>
+              <p className="text-[11px] text-slate-400 truncate">
+                {role === 'client' ? 'Acme Health (Client)' : 'Agency Account Lead'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* --- MAIN CONTENT AREA --- */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto max-h-screen">
+        {/* TOP NAVBAR */}
+        <header className="h-16 border-b border-slate-800 bg-slate-900/40 backdrop-blur-md px-6 flex items-center justify-between shrink-0 sticky top-0 z-20">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-bold text-white capitalize">{activeTab.replace('-', ' ')}</h2>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-medium">
+              Acme Corp Workspace
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Quick Status Pill */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span className="text-slate-300 font-medium">Security Gate: Active</span>
+            </div>
+
+            <button 
+              onClick={() => showNotification("Workspace alert notifications synchronized.")}
+              className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition"
+              title="Notifications"
+            >
+              <Bell className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* DASHBOARD TAB */}
+        {activeTab === 'dashboard' && (
+          <div className="p-6 space-y-6">
+            {/* Welcome Banner */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-slate-900 border border-blue-500/20 p-6 md:p-8">
+              <div className="relative z-10 max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-400 text-xs font-semibold mb-3">
+                  <Sparkles className="w-3.5 h-3.5" /> Direct Client Workspace
+                </div>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                  Welcome back, {role === 'client' ? 'David' : 'Sarah'}
+                </h2>
+                <p className="text-slate-300 text-sm mt-2 leading-relaxed">
+                  {role === 'client' 
+                    ? 'Here is an overview of your active projects, file security updates, and outstanding invoices.' 
+                    : 'Manage client deliverables, approve pending requests, and track payments in real time.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Projects</p>
+                  <h3 className="text-2xl font-bold text-white mt-1">{projects.length}</h3>
+                  <p className="text-xs text-emerald-400 mt-1 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" /> On Track
+                  </p>
+                </div>
+                <div className="p-3 bg-blue-500/10 rounded-xl text-blue-400 border border-blue-500/20">
+                  <CheckSquare className="w-6 h-6" />
+                </div>
+              </div>
+
+              <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pending Invoice</p>
+                  <h3 className="text-2xl font-bold text-amber-400 mt-1">${pendingTotal.toLocaleString()}</h3>
+                  <p className="text-xs text-slate-400 mt-1">{invoices.filter(i => i.status === 'Pending').length} due item</p>
+                </div>
+                <div className="p-3 bg-amber-500/10 rounded-xl text-amber-400 border border-amber-500/20">
+                  <Clock className="w-6 h-6" />
+                </div>
+              </div>
+
+              <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Paid</p>
+                  <h3 className="text-2xl font-bold text-emerald-400 mt-1">${paidTotal.toLocaleString()}</h3>
+                  <p className="text-xs text-slate-400 mt-1">Verified via Stripe</p>
+                </div>
+                <div className="p-3 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20">
+                  <DollarSign className="w-6 h-6" />
+                </div>
+              </div>
+
+              <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vault Files</p>
+                  <h3 className="text-2xl font-bold text-indigo-400 mt-1">{files.length}</h3>
+                  <p className="text-xs text-slate-400 mt-1">Encrypted End-to-End</p>
+                </div>
+                <div className="p-3 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/20">
+                  <Lock className="w-6 h-6" />
+                </div>
+              </div>
+            </div>
+
+            {/* Two Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Active Projects Quick Summary */}
+              <div className="lg:col-span-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-white text-base">Active Projects Overview</h3>
+                  <button 
+                    onClick={() => setActiveTab('projects')}
+                    className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                  >
+                    View All Details <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {projects.map(proj => (
+                    <div key={proj.id} className="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <h4 className="font-semibold text-slate-100 text-sm">{proj.name}</h4>
+                          <p className="text-xs text-slate-400">Lead PM: {proj.manager} • Due {proj.deadline}</p>
+                        </div>
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 font-medium border border-blue-500/20">
+                          {proj.status}
+                        </span>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div>
+                        <div className="flex justify-between text-xs font-medium text-slate-400 mb-1">
+                          <span>Overall Progress</span>
+                          <span className="text-white">{proj.progress}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
+                            style={{ width: `${proj.progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Audit Activity & Security Log */}
+              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-white text-base flex items-center gap-2">
+                      <ShieldAlert className="w-4 h-4 text-indigo-400" /> Audit Log
+                    </h3>
+                    <span className="text-[11px] text-slate-400">Real-time Feed</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {auditLogs.slice(0, 5).map(log => (
+                      <div key={log.id} className="text-xs p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 space-y-1">
+                        <div className="flex justify-between items-center text-slate-300 font-medium">
+                          <span>{log.action}</span>
+                          <span className="text-[10px] text-slate-500">{log.time}</span>
+                        </div>
+                        <p className="text-slate-400 text-[11px] leading-tight">{log.details}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-800/80 text-center">
+                  <p className="text-[11px] text-slate-400">SOC2 Type II Encrypted Audit Trail Active</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PROJECT STATUS TAB */}
+        {activeTab === 'projects' && (
+          <div className="p-6 space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-bold text-white">Project Status & Deliverables</h3>
+                <p className="text-slate-400 text-xs mt-0.5">Track milestones, pending reviews, and delivery progress.</p>
+              </div>
+
+              {role === 'admin' && (
+                <button 
+                  onClick={() => showNotification("Admin action: Created a new project tracking workflow")}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow"
+                >
+                  <Plus className="w-4 h-4" /> Create Milestone
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-6">
+              {projects.map((project) => (
+                <div key={project.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
+                  {/* Header */}
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <h4 className="text-lg font-bold text-white">{project.name}</h4>
+                        <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">
+                          {project.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Client: <strong className="text-slate-300">{project.client}</strong> • Budget: ${project.budget.toLocaleString()} • Target Completion: {project.deadline}
+                      </p>
+                    </div>
+
+                    <div className="w-full md:w-64">
+                      <div className="flex justify-between text-xs font-semibold mb-1.5">
+                        <span className="text-slate-400">Completion</span>
+                        <span className="text-blue-400">{project.progress}%</span>
+                      </div>
+                      <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${project.progress}%` }}></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Milestones Grid */}
+                  <div>
+                    <h5 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-indigo-400" /> Key Milestones Timeline
+                    </h5>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                      {project.milestones.map((m) => (
+                        <div 
+                          key={m.id} 
+                          onClick={() => handleToggleMilestone(project.id, m.id)}
+                          className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                            m.status === 'Completed' 
+                              ? 'bg-slate-950/80 border-emerald-500/30 text-emerald-300' 
+                              : m.status === 'In Progress'
+                              ? 'bg-blue-950/20 border-blue-500/40 text-blue-300'
+                              : 'bg-slate-950/40 border-slate-800 text-slate-400'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[11px] font-semibold">{m.date}</span>
+                            {m.status === 'Completed' ? (
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            ) : m.status === 'In Progress' ? (
+                              <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />
+                            ) : (
+                              <Clock className="w-4 h-4 text-slate-500" />
+                            )}
+                          </div>
+                          <p className="text-xs font-semibold text-slate-100">{m.title}</p>
+                          <p className="text-[10px] mt-2 capitalize font-mono text-slate-400">{m.status}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Deliverables & Sign-offs */}
+                  <div>
+                    <h5 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+                      <CheckSquare className="w-4 h-4 text-emerald-400" /> Deliverables & Client Approvals
+                    </h5>
+                    <div className="space-y-2">
+                      {project.deliverables.map((del) => (
+                        <div key={del.id} className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800">
+                          <div className="flex items-center gap-3">
+                            <FileCode className="w-4 h-4 text-slate-400" />
+                            <span className="text-xs font-medium text-slate-200">{del.title}</span>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-medium ${
+                              del.status === 'Approved' 
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                            }`}>
+                              {del.status}
+                            </span>
+
+                            {role === 'client' && del.status !== 'Approved' && (
+                              <button
+                                onClick={() => handleApproveDeliverable(project.id, del.id)}
+                                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition"
+                              >
+                                Approve Deliverable
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SECURE FILE SHARING TAB */}
+        {activeTab === 'files' && (
+          <div className="p-6 space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <FolderLock className="w-5 h-5 text-indigo-400" /> Secure File Vault
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Encrypted document storage and permission-controlled asset sharing.</p>
+              </div>
+
+              {/* Upload Drop Zone Simulation Button */}
+              <label className="cursor-pointer px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-xl flex items-center gap-2 shadow shadow-blue-500/20 transition">
+                <Upload className="w-4 h-4" /> Upload Secure File
+                <input type="file" className="hidden" onChange={handleFileUpload} />
+              </label>
+            </div>
+
+            {/* Folder Tabs & Search Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-slate-900 border border-slate-800 p-3 rounded-2xl">
+              <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto">
+                {['All', 'Contracts & SOWs', 'Security & Compliance', 'Design Assets', 'Financials'].map((folder) => (
+                  <button
+                    key={folder}
+                    onClick={() => setSelectedFolderFilter(folder)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition ${
+                      selectedFolderFilter === folder
+                        ? 'bg-blue-600 text-white shadow'
+                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    {folder}
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative w-full sm:w-64">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Search file name..."
+                  value={fileSearchQuery}
+                  onChange={(e) => setFileSearchQuery(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Drag & Drop Visual Zone */}
+            <div 
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleFileUpload}
+              className="border-2 border-dashed border-slate-800 hover:border-blue-500/50 bg-slate-900/30 rounded-2xl p-6 text-center transition"
+            >
+              {isUploading ? (
+                <div className="flex flex-col items-center justify-center space-y-2">
+                  <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
+                  <p className="text-xs font-semibold text-slate-300">Encrypting & uploading document to server...</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <Upload className="w-8 h-8 text-slate-500 mx-auto" />
+                  <p className="text-xs font-semibold text-slate-300">Drag and drop files here to upload to vault</p>
+                  <p className="text-[11px] text-slate-500">Supported formats: PDF, ZIP, XLSX, PNG (Max 500MB)</p>
+                </div>
+              )}
+            </div>
+
+            {/* File Table */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-300">
+                  <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider">
+                    <tr>
+                      <th className="p-4">File Name</th>
+                      <th className="p-4">Folder</th>
+                      <th className="p-4">Uploaded By</th>
+                      <th className="p-4">Permissions</th>
+                      <th className="p-4">Date</th>
+                      <th className="p-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {filteredFiles.map((file) => (
+                      <tr key={file.id} className="hover:bg-slate-800/40 transition">
+                        <td className="p-4 font-semibold text-white flex items-center gap-3">
+                          {file.type === 'pdf' && <FileText className="w-5 h-5 text-red-400" />}
+                          {file.type === 'zip' && <FolderLock className="w-5 h-5 text-amber-400" />}
+                          {file.type === 'sheet' && <FileSpreadsheet className="w-5 h-5 text-emerald-400" />}
+                          <div>
+                            <p className="hover:text-blue-400 transition cursor-pointer">{file.name}</p>
+                            <span className="text-[10px] text-slate-500 font-normal">{file.size}</span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg text-[11px]">
+                            {file.folder}
+                          </span>
+                        </td>
+                        <td className="p-4 text-slate-400">{file.uploadedBy}</td>
+                        <td className="p-4">
+                          <span className="inline-flex items-center gap-1.5 text-[11px] text-emerald-400">
+                            <Lock className="w-3 h-3" /> {file.access}
+                          </span>
+                        </td>
+                        <td className="p-4 text-slate-400">{file.date}</td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                addAuditLog('File Downloaded', `${file.name} downloaded.`);
+                                showNotification(`Downloading ${file.name}...`);
+                              }}
+                              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+                              title="Download File"
+                            >
+                              <Download className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CLIENT MESSAGING TAB */}
+        {activeTab === 'messages' && (
+          <div className="p-6 flex-1 flex flex-col min-h-[600px]">
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-blue-400" /> Workspace Discussions
+              </h3>
+              <p className="text-slate-400 text-xs">Direct encrypted communications channel between Client & Agency Project Managers.</p>
+            </div>
+
+            <div className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col md:flex-row overflow-hidden">
+              {/* Channel List Sidebar */}
+              <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-slate-800 p-4 space-y-2 bg-slate-950/50 shrink-0">
+                <p className="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-2">Channels & Topics</p>
+                {['General Updates', 'Technical & Infra', 'Design & UX Review', 'Billing Queries'].map((chan) => (
+                  <button
+                    key={chan}
+                    onClick={() => setActiveChannel(chan)}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition flex items-center justify-between ${
+                      activeChannel === chan 
+                        ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
+                        : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                    }`}
+                  >
+                    <span># {chan}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Chat Thread */}
+              <div className="flex-1 flex flex-col justify-between p-4 bg-slate-900/40">
+                {/* Channel Header */}
+                <div className="pb-3 border-b border-slate-800 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-bold text-sm text-white">#{activeChannel}</h4>
+                    <span className="text-[11px] text-slate-400">Encrypted workspace chat thread</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span> 2 Active Now
+                  </div>
+                </div>
+
+                {/* Messages Feed */}
+                <div className="flex-1 overflow-y-auto py-4 space-y-4 max-h-[400px]">
+                  {messages.filter(m => m.channel === activeChannel || activeChannel === 'General Updates').map((msg) => (
+                    <div key={msg.id} className="flex gap-3">
+                      <img src={msg.avatar} alt="Avatar" className="w-8 h-8 rounded-full border border-slate-700 object-cover mt-0.5" />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-200">{msg.sender}</span>
+                          <span className="text-[10px] text-slate-400">({msg.role})</span>
+                          <span className="text-[10px] text-slate-500 ml-auto">{msg.time}</span>
+                        </div>
+                        <div className="bg-slate-950/80 border border-slate-800 p-3 rounded-2xl text-xs text-slate-200 leading-relaxed max-w-2xl">
+                          {msg.text}
+
+                          {msg.attachments.length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-slate-800/80 flex flex-wrap gap-2">
+                              {msg.attachments.map((att, idx) => (
+                                <div key={idx} className="flex items-center gap-1.5 bg-slate-900 border border-slate-700 px-2.5 py-1 rounded-lg text-[11px] text-blue-400">
+                                  <Paperclip className="w-3 h-3" /> {att}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Message Input Box */}
+                <form onSubmit={handleSendMessage} className="pt-3 border-t border-slate-800 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => showNotification("Simulated file attached to message.")}
+                    className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition"
+                    title="Attach File"
+                  >
+                    <Paperclip className="w-4 h-4" />
+                  </button>
+
+                  <input
+                    type="text"
+                    placeholder={`Message #${activeChannel} as ${role === 'client' ? 'David' : 'Sarah'}...`}
+                    value={newMessageText}
+                    onChange={(e) => setNewMessageText(e.target.value)}
+                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500"
+                  />
+
+                  <button
+                    type="submit"
+                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow transition"
+                  >
+                    <Send className="w-4 h-4" /> Send
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* INVOICING & PAYMENTS TAB */}
+        {activeTab === 'invoices' && (
+          <div className="p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-emerald-400" /> Invoices & Billing
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Manage deliverables pricing, inspect invoice breakdown, and execute payments.</p>
+              </div>
+            </div>
+
+            {/* Summary Banner */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <p className="text-xs text-slate-400 font-medium">Total Pending Outstanding</p>
+                <p className="text-2xl font-extrabold text-amber-400 mt-1">${pendingTotal.toLocaleString()}</p>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+                <p className="text-xs text-slate-400 font-medium">Total Settled Payments</p>
+                <p className="text-2xl font-extrabold text-emerald-400 mt-1">${paidTotal.toLocaleString()}</p>
+              </div>
+              <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-slate-400 font-medium">Integrated Gateway</p>
+                  <p className="text-sm font-bold text-white mt-1">Stripe Checkout Ready</p>
+                </div>
+                <ShieldCheck className="w-8 h-8 text-blue-400" />
+              </div>
+            </div>
+
+            {/* Invoices List */}
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-300">
+                  <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider">
+                    <tr>
+                      <th className="p-4">Invoice ID</th>
+                      <th className="p-4">Project</th>
+                      <th className="p-4">Issue Date</th>
+                      <th className="p-4">Due Date</th>
+                      <th className="p-4">Amount</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {invoices.map((inv) => (
+                      <tr key={inv.id} className="hover:bg-slate-800/40 transition">
+                        <td className="p-4 font-bold text-white">{inv.id}</td>
+                        <td className="p-4 text-slate-300">{inv.project}</td>
+                        <td className="p-4 text-slate-400">{inv.issueDate}</td>
+                        <td className="p-4 text-slate-400">{inv.dueDate}</td>
+                        <td className="p-4 font-bold text-white">${inv.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="p-4">
+                          <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                            inv.status === 'Paid'
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                              : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                          }`}>
+                            {inv.status}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => setSelectedInvoice(inv)}
+                              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition flex items-center gap-1"
+                            >
+                              <Eye className="w-3.5 h-3.5" /> Inspect
+                            </button>
+
+                            {inv.status === 'Pending' && (
+                              <button
+                                onClick={() => {
+                                  setSelectedInvoice(inv);
+                                  setPaymentStep('card');
+                                  setIsPaymentModalOpen(true);
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow transition flex items-center gap-1"
+                              >
+                                <CreditCard className="w-3.5 h-3.5" /> Pay Now
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* --- INVOICE DETAILS MODAL --- */}
+      {selectedInvoice && !isPaymentModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl p-6 space-y-6 shadow-2xl relative">
+            <button
+              onClick={() => setSelectedInvoice(null)}
+              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div>
+                <h3 className="text-lg font-bold text-white">Invoice Details</h3>
+                <p className="text-xs text-slate-400">{selectedInvoice.id} • Issued to Acme Health Corp</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                selectedInvoice.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+              }`}>
+                {selectedInvoice.status}
+              </span>
+            </div>
+
+            {/* Line Items */}
+            <div className="space-y-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Line Items Breakdown</p>
+              <div className="bg-slate-950 border border-slate-800 rounded-xl divide-y divide-slate-800">
+                {selectedInvoice.items.map((item, idx) => (
+                  <div key={idx} className="p-3.5 flex justify-between items-center text-xs">
+                    <span className="text-slate-200">{item.description}</span>
+                    <span className="font-semibold text-white">${item.cost.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center pt-2">
+              <span className="text-xs text-slate-400">Total Amount Due</span>
+              <span className="text-xl font-extrabold text-white">${selectedInvoice.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+              {selectedInvoice.status === 'Pending' && (
+                <button
+                  onClick={() => setPaymentStep('card') || setIsPaymentModalOpen(true)}
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow transition"
+                >
+                  Proceed to Payment Gateway
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- PAYMENT GATEWAY MODAL (STRIPE / PAYPAL SIMULATION) --- */}
+      {isPaymentModalOpen && selectedInvoice && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-6 shadow-2xl relative">
+            <button
+              onClick={() => { setIsPaymentModalOpen(false); setPaymentStep('card'); }}
+              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {paymentStep === 'card' && (
+              <form onSubmit={handleProcessPayment} className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                  <div>
+                    <h3 className="font-bold text-white text-base">Secure Stripe Checkout</h3>
+                    <p className="text-[11px] text-slate-400">Paying {selectedInvoice.id} (${selectedInvoice.amount.toLocaleString()})</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="block text-slate-300 font-medium mb-1">Cardholder Name</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="David Miller"
+                      value={cardDetails.name}
+                      onChange={e => setCardDetails({ ...cardDetails, name: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-slate-300 font-medium mb-1">Card Number</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="4242 •••• •••• 4242"
+                      value={cardDetails.number}
+                      onChange={e => setCardDetails({ ...cardDetails, number: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-blue-500 font-mono"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-slate-300 font-medium mb-1">Expiry Date</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="MM/YY"
+                        value={cardDetails.exp}
+                        onChange={e => setCardDetails({ ...cardDetails, exp: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-blue-500 font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-300 font-medium mb-1">CVC / CVV</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="123"
+                        value={cardDetails.cvc}
+                        onChange={e => setCardDetails({ ...cardDetails, cvc: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-blue-500 font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+                >
+                  <Lock className="w-4 h-4" /> Authorize & Pay ${selectedInvoice.amount.toLocaleString()}
+                </button>
+              </form>
+            )}
+
+            {paymentStep === 'processing' && (
+              <div className="py-12 text-center space-y-4">
+                <RefreshCw className="w-10 h-10 text-emerald-400 animate-spin mx-auto" />
+                <div>
+                  <h4 className="font-bold text-white text-base">Processing Transaction...</h4>
+                  <p className="text-xs text-slate-400 mt-1">Communicating with bank 256-bit SSL gateway.</p>
+                </div>
+              </div>
+            )}
+
+            {paymentStep === 'success' && (
+              <div className="py-6 text-center space-y-4">
+                <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30">
+                  <CheckCircle2 className="w-7 h-7" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-lg">Payment Confirmed!</h4>
+                  <p className="text-xs text-slate-300 mt-1">Receipt sent to email. Transaction ID: #TXN-9948102</p>
+                </div>
+                <button
+                  onClick={() => { setIsPaymentModalOpen(false); setSelectedInvoice(null); setPaymentStep('card'); }}
+                  className="px-6 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold transition"
+                >
+                  Close Window
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
